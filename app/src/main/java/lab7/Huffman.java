@@ -3,8 +3,33 @@
  */
 package lab7;
 
+import java.util.Scanner;
+import java.io.IOException;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import heap.Heap;
+
 public class Huffman {
-    public static void main(String[] args) {
-        
+    public static void main(String[] args) throws IOException{
+        String fileName = args[0];
+        Scanner scanner = new Scanner(new File(fileName));
+
+        String input = scanner.nextLine();
+
+        if(input.length() < 100){
+
+        }
     }
+    private Map<Character, Integer> countFreq(String input){
+        HashMap<Character, Integer> countFreq = new HashMap<Character, Integer>(); 
+        int count = 0;
+        for(int i = 0; i < input.length(); i++){
+            countFreq.put(input.charAt(i), count);
+            count++;
+        }
+        return countFreq;
+    }
+
+
 }
