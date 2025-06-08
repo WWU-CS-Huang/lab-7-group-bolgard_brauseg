@@ -13,6 +13,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import heap.Heap;
+import java.util.PriorityQueue;
 
 public class Huffman {
 
@@ -55,12 +56,39 @@ public class Huffman {
     public static void main(String[] args) throws IOException{
         String fileName = args[0];
         Scanner scanner = new Scanner(new File(fileName));
+        StringBuilder inputBuilder = new StringBuilder();
 
-        String input = scanner.nextLine();
-
-        if(input.length() < 100){
-
+        //read thru input file line by line
+        while(scanner.hasNextLine()) {
+            inputBuilder.append(scanner.nextLine());
+            if(scanner.hasNextLine()) {
+                inputBuilder.append("\n"); // preserve new lines
+            }
         }
+        scanner.close();
+        String input = inputBuilder.toString();
+
+        if(input.isEmpty()){
+            System.out.println("Input is empty");
+            return;
+        }
+        // count frequency, build tree, then encode and decode
+        Map<Character, Integer> freqMap = new Huffman().countFreq(input);
+        Node root = buildTree(freqMap);
+        String encoded = encode(root, input);
+        String decoded = decode(root, encoded);
+
+        // print full results if small input
+        if(input.length() < 100) {
+            System.out.println("Input string: " + input);
+            System.out.println("Encoded string: " + encoded);
+            System.out.println("Decoded string: " + decoded);
+        }
+
+        // print summary of ressults and compression ratio
+        System.out.println("Decoded equals input: " + decoded.equals(input));
+        double compressRatio = ((double) encoded.length() / (input.length()) / 8.);
+        System.out.println("Compression ratio: " + compressRatio);
     }
 
     // count the frequency of each character in the input string
@@ -119,5 +147,34 @@ public class Huffman {
             buildBinaryMap(root, "", binaryMap);
         }
         return binaryMap;
+    }
+
+    private static String encode(Node root, String input) {
+        StringBuilder encoded = new StringBuilder(input.length() * 2);
+        Map<Character, String> binaryMap = getBinaryCode(root);
+
+        for (char c : input.toCharArray()) {
+            encoded.append(binaryMap.get(c));
+        }
+        return encoded.toString();
+    }
+    private static String decode(Node root, String bits) {
+        StringBuilder decoded = new StringBuilder(bits.length() / 2);
+        Node current = root;
+
+        for (char bit : bits.toCharArray()) {
+            // if 0, go left, if 1 (else), go right
+            if (bit == '0') {
+                current = current.left;
+            } else {
+                current = current.right;
+            }
+            //if Leaf, get character
+            if (current.isLeaf()) {
+                decoded.append(current.ch);
+                current = root; // reset to root for next character
+            }
+        }
+        return decoded.toString();
     }
 }
